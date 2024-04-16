@@ -31,7 +31,7 @@ def base_fetch_data():
     
 # Swapping Function - to be tested on Mainnet
     
-def uniswap_swap_function():
+def uniswap_swap_function1():
     router_contract    =    w3.eth.contract(router_address, abi=router_abi) 
     nonce              =    w3.eth.get_transaction_count(account)
     
@@ -56,6 +56,34 @@ def uniswap_swap_function():
     w3.eth.wait_for_transaction_receipt(send_transaction)
     print("Transaction Receipt:", w3.eth.get_transaction_receipt(send_transaction))
     
+# Implementing through swapExactTokenswithTokens
+
+def uniswap_swap_function2():
+    router_contract    =    w3.eth.contract(router_address, abi=router_abi) 
+    nonce              =    w3.eth.get_transaction_count(account)
+    
+    swap_transaction   =    router_contract.functions.swapExactTokensForTokens(
+        w3.toWei(0.01, 'ether'),
+        w3.toWei(0.01, 'ether'),
+        [token_send, token_receive],
+        account,
+        int(time.time()) + (20*60)
+    ).build_transaction({
+        'nonce': nonce,
+        'gas': 200000,
+        'gasPrice': w3.eth.gas_price,
+        'from': account,
+    })
+    
+    #Sign the transaction
+    
+    signed_transaction  =   w3.eth.account.sign_transaction(swap_transaction, private_key)
+    send_transaction    =   w3.eth.send_raw_transaction(signed_transaction.rawTransaction)
+    print("Transaction Hash:", w3.to_hex(send_transaction))
+    w3.eth.wait_for_transaction_receipt(send_transaction)
+    print("Transaction Receipt:", w3.eth.get_transaction_receipt(send_transaction))
+    
 if __name__ == "__main__":    
     base_fetch_data()
-    uniswap_swap_function()
+    uniswap_swap_function1()
+    #uniswap_swap_function2()
